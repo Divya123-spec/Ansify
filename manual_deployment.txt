@@ -1,0 +1,11 @@
+docker login -u 'robot$untangle+untangle' -p 'MSfqU9vyO4MOHyWfRAWxz4MPgKyO3LSx' registry.app.corpintra.net
+docker build -t registry.app.corpintra.net/untangle/client:stage -f Dockerfile .
+docker push registry.app.corpintra.net/untangle/client:stage
+docker image rm -f registry.app.corpintra.net/untangle/client:stage
+
+
+kubectl --kubeconfig C:/Users/IBISWAS/Desktop/kubeconfig/c51p138.kubeconfig --namespace qa-platform delete deployment mb-qa-config-server
+kubectl --kubeconfig C:/Users/IBISWAS/Desktop/kubeconfig/c51p138.kubeconfig --namespace qa-platform apply -f "C:\Users\IBISWAS\Desktop\daimler project\HoT-CTO-QA-Platform\mb-qa-config-server\config\kubernetes-config\stage\deployment.yml"
+kubectl --kubeconfig C:/Users/IBISWAS/Desktop/kubeconfig/c51p138.kubeconfig --namespace qa-platform apply -f "C:\Users\IBISWAS\Desktop\daimler project\HoT-CTO-QA-Platform\mb-qa-config-server\config\kubernetes-config\stage\networkpolicy.yml"
+
+kubectl --kubeconfig C:/Users/IBISWAS/Desktop/kubeconfig/c51p138.kubeconfig --namespace qa-platform apply -f "C:\Users\IBISWAS\Desktop\daimler project\HoT-CTO-QA-Platform\mb-qa-config-server\config\kubernetes-config\stage\secret-untangle.yml"

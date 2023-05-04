@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mb-qa-client.fullname" . }}
+  labels:
+    {{- include "mb-qa-client.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mb-qa-client.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mb-qa-client.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mb-qa-client.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - env:
+          - name: SPRING_PROFILES_ACTIVE
+            valueFrom:
+              secretKeyRef:
+                key: SPRING_PROFILES_ACTIVE
+                name: untanglesecret
+          - name: JASYPT_ENCRYPTOR_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: JASYPT_ENCRYPTOR_PASSWORD
+                name: untanglesecret
+          - name: CONFIG.SERVER.GIT.USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: CONFIG.SERVER.GIT.USERNAME
+                name: untanglesecret
+          - name: CONFIG.SERVER.GIT.PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: CONFIG.SERVER.GIT.PASSWORD
+                name: untanglesecret
+          - name: REACT_APP_QUESTION_SERVICE_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: REACT_APP_QUESTION_SERVICE_ENDPOINT
+                name: untangleconfig
+          - name: REACT_APP_SEARCH_SERVICE_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: REACT_APP_SEARCH_SERVICE_ENDPOINT
+                name: untangleconfig
+          - name: REACT_APP_USER_ADMIN_SERVICE_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                key: REACT_APP_USER_ADMIN_SERVICE_ENDPOINT
+                name: untangleconfig
+          - name: HTTP_PROXY
+            value: http://security-proxy.emea.svc.corpintra.net:3128
+          - name: HTTPS_PROXY
+            value: http://security-proxy.emea.svc.corpintra.net:3128
+          - name: NO_PROXY
+            value: localhost,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster.local
+          - name: CHE_WORKSPACE_WSAGENT__JAVA__OPTIONS
+            value: -Dhttp.proxyHost=$IP -Dhttp.proxyPort=$PORT
+          name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+         
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

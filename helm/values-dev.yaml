@@ -1,0 +1,94 @@
+# Default values for mb-qa-client.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: registry.app.corpintra.net/untangle/mb-qa-client
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "stage"
+
+imagePullSecrets:
+ - name: daimler-registry
+nameOverride: "mb-qa-client"
+fullnameOverride: "mb-qa-client"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "mb-qa-client-sa"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+   runAsNonRoot: true
+   runAsUser: 999
+   runAsGroup: 999
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: 
+    kubernetes.io/ingress.class: traefik-internal
+    traefik.ingress.kubernetes.io/router.tls: "false"
+  hosts:
+    - host: untangle-dev.app.corpintra.net
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  #tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: 
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+   limits:
+     cpu: 900m
+     memory: 2Gi
+   requests:
+     cpu: 100m
+     memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+secrets:
+  BACK_END_SERVICE_URL_BASE: aHR0cHM6Ly91bnRhbmdsZS1kZXYuYXBwLmNvcnBpbnRyYS5uZXQvc2VydmljZQo=
+  CONFIG.SERVER.GIT.PASSWORD: Z2hwX2hFbE1HTDFWQWo1c3U1dmp0ZzlwaDF2WkN2WTdWTTI3czFuNQ==
+  CONFIG.SERVER.GIT.USERNAME: U09VTkFUSA==
+  CONFIG.SERVER.LABEL: bWFzdGVy
+  JASYPT_ENCRYPTOR_PASSWORD: aG90aW5zaWRlc2VjcmV0
+  SPRING_PROFILES_ACTIVE: ZGV2
